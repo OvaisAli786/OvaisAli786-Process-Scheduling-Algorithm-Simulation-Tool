@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProcessSim — CPU Scheduling Algorithm Simulator</title>
+  <meta name="description" content="A professional CPU Process Scheduling Simulator supporting FCFS, SJF, Priority, and Round Robin algorithms with Gantt chart visualization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Ambient background orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <!-- ─── HEADER ─────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.9"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.6"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.6"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.35"/>
+          </svg>
+        </div>
+        <span class="logo-text">Process<span class="logo-accent">Sim</span></span>
+      </div>
+      <nav class="header-nav">
+        <span class="nav-badge">CPU Scheduler</span>
+      </nav>
+      <div class="header-actions">
+        <button class="btn-icon" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+          <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── MAIN ──────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- ── HERO ── -->
+    <section class="hero-section">
+      <h1 class="hero-title">CPU Scheduling <span class="gradient-text">Simulator</span></h1>
+      <p class="hero-sub">Visualize FCFS · SJF · Priority · Round Robin with real-time Gantt charts and metrics</p>
+    </section>
+
+    <!-- ── CONTROL PANEL ── -->
+    <section class="panel-grid">
+
+      <!-- Algorithm Config Card -->
+      <div class="card config-card">
+        <div class="card-header">
+          <div class="card-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">Algorithm</h2>
+            <p class="card-sub">Select scheduling strategy</p>
+          </div>
+        </div>
+
+        <div class="algo-tabs" role="tablist">
+          <button class="algo-tab active" data-algo="FCFS" role="tab">FCFS</button>
+          <button class="algo-tab" data-algo="SJF" role="tab">SJF</button>
+          <button class="algo-tab" data-algo="PRIORITY" role="tab">Priority</button>
+          <button class="algo-tab" data-algo="RR" role="tab">Round Robin</button>
+        </div>
+
+        <div class="algo-desc" id="algoDesc">
+          <span class="algo-tag">Non-Preemptive</span>
+          Processes are executed in order of arrival. Simple and fair for batch systems.
+        </div>
+
+        <div class="rr-config" id="rrConfig" style="display:none;">
+          <label class="field-label" for="timeQuantum">Time Quantum</label>
+          <div class="quantum-row">
+            <input type="range" id="quantumSlider" min="1" max="20" value="2" class="slider" aria-label="Time quantum slider"/>
+            <input type="number" id="timeQuantum" min="1" max="100" value="2" class="field-input compact" aria-label="Time quantum value"/>
+          </div>
+        </div>
+
+        <div class="sjf-config" id="sjfConfig" style="display:none;">
+          <label class="toggle-label">
+            <input type="checkbox" id="preemptiveToggle" class="toggle-input" />
+            <span class="toggle-track"></span>
+            <span class="toggle-text">Preemptive (SRTF)</span>
+          </label>
+        </div>
+
+        <div class="priority-config" id="priorityConfig" style="display:none;">
+          <label class="toggle-label">
+            <input type="checkbox" id="priorityPreemptiveToggle" class="toggle-input" />
+            <span class="toggle-track"></span>
+            <span class="toggle-text">Preemptive Priority</span>
+          </label>
+          <p class="hint-text">Lower number = higher priority</p>
+        </div>
+      </div>
+
+      <!-- Process Input Card -->
+      <div class="card input-card">
+        <div class="card-header">
+          <div class="card-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">Process Input</h2>
+            <p class="card-sub">Define processes to schedule</p>
+          </div>
+        </div>
+
+        <div class="add-process-form">
+          <div class="form-row">
+            <div class="field-group">
+              <label class="field-label" for="pidInput">Process ID</label>
+              <input type="text" id="pidInput" class="field-input" placeholder="P1" maxlength="6" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="arrivalInput">Arrival Time</label>
+              <input type="number" id="arrivalInput" class="field-input" placeholder="0" min="0" max="999" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="burstInput">Burst Time</label>
+              <input type="number" id="burstInput" class="field-input" placeholder="5" min="1" max="999" />
+            </div>
+            <div class="field-group" id="priorityGroup">
+              <label class="field-label" for="priorityInput">Priority</label>
+              <input type="number" id="priorityInput" class="field-input" placeholder="1" min="1" max="100" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="addProcessBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Process
+            </button>
+            <button class="btn btn-ghost" id="generateBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.96"/></svg>
+              Generate
+            </button>
+            <button class="btn btn-ghost" id="clearBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Clear All
+            </button>
+          </div>
+        </div>
+
+        <!-- Process Table -->
+        <div class="process-table-wrap">
+          <div class="process-table-header">
+            <span>PID</span>
+            <span>Arrival</span>
+            <span>Burst</span>
+            <span id="priorityHeader">Priority</span>
+            <span></span>
+          </div>
+          <div class="process-list" id="processList">
+            <div class="empty-state" id="emptyState">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+              </svg>
+              <p>No processes yet. Add one above or generate random processes.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="run-bar">
+          <div class="process-count" id="processCount">0 processes</div>
+          <button class="btn btn-run" id="runBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run Simulation
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── LOADING ── -->
+    <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p>Computing schedule…</p>
+      </div>
+    </div>
+
+    <!-- ── RESULTS ── -->
+    <section class="results-section" id="resultsSection" style="display:none;">
+
+      <!-- Stats Strip -->
+      <div class="stats-strip" id="statsStrip"></div>
+
+      <!-- Gantt Chart Card -->
+      <div class="card gantt-card">
+        <div class="card-header">
+          <div class="card-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><polyline points="7 3 7 6"/><polyline points="17 3 17 6"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">Gantt Chart</h2>
+            <p class="card-sub">Timeline visualization</p>
+          </div>
+          <div class="gantt-controls">
+            <button class="btn-icon small" id="zoomOut" title="Zoom out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <span class="zoom-label" id="zoomLabel">100%</span>
+            <button class="btn-icon small" id="zoomIn" title="Zoom in">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="gantt-scroll-wrap">
+          <div class="gantt-container" id="ganttContainer"></div>
+          <div class="gantt-timeline" id="ganttTimeline"></div>
+        </div>
+        <div class="gantt-legend" id="ganttLegend"></div>
+      </div>
+
+      <!-- Metrics Table Card -->
+      <div class="card metrics-card">
+        <div class="card-header">
+          <div class="card-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">Process Metrics</h2>
+            <p class="card-sub">Detailed scheduling results</p>
+          </div>
+          <button class="btn btn-ghost small" id="exportCSV">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+        <div class="table-scroll">
+          <table class="metrics-table" id="metricsTable">
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>Arrival</th>
+                <th>Burst</th>
+                <th class="col-priority" id="priorityCol">Priority</th>
+                <th>Start</th>
+                <th>Finish</th>
+                <th>Turnaround</th>
+                <th>Waiting</th>
+                <th>Response</th>
+              </tr>
+            </thead>
+            <tbody id="metricsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Comparison Card -->
+      <div class="card comparison-card" id="comparisonCard" style="display:none;">
+        <div class="card-header">
+          <div class="card-icon pink">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">Algorithm Comparison</h2>
+            <p class="card-sub">Average metrics across all algorithms</p>
+          </div>
+        </div>
+        <div class="comparison-grid" id="comparisonGrid"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+  </footer>
+
+  <!-- ─── TOAST ──────────────────────────────────────────────────── -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
